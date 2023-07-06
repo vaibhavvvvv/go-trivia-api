@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  web:
+  #build property is path to our docker file
+    build: . 
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+  # volumes : to tell docker where we want to process the data from this web service    
+    volumes:
+      - .:/usr/src/app
+    command: air run cmd/main.go -b 0.0.0.0
+    #command: go run cmd/main.go -b 0.0.0.0 to run main.go and bind it at port 0.0.0.0
+
+  db:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_NAME=${DB_NAME}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+#for postgres data to be always processed and aany changes will have to be done manually
+volumes:
+  postgres-db:
+
+
+#sudo docker compose up
+#sudo docker compose run --service-ports web bash :to run the serive- web/to enter the container
+# exit
+
