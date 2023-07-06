@@ -26,3 +26,45 @@ func CreateFact(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fact)
 }
+
+func DeleteFact(c *fiber.Ctx) error {
+	id := c.Params("id")
+	fact := models.Fact{}
+	database.DB.Db.Where("id = ?", id).First(&fact)
+
+	if fact.ID == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Fact not found",
+		})
+	}
+
+	database.DB.Db.Delete(&fact)
+
+	return c.Status(200).JSON(fiber.Map{
+		"message": "Fact deleted",
+	})
+}
+
+func UpdateFact(c *fiber.Ctx) error {
+	id := c.Params("id")
+	fact := models.Fact{}
+
+	database.DB.Db.Where("id = ?", id).First(&fact)
+
+	if fact.ID == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Fact not found",
+		})
+	}
+
+	if err := c.BodyParser(&fact); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	database.DB.Db.Updates(&fact)
+
+	return c.Status(200).JSON(fact)
+
+}
